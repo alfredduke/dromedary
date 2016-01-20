@@ -2,6 +2,39 @@
   "Description":"Launch nested CloudFormation stack to provision all Dromedary resources",
   "AWSTemplateFormatVersion":"2010-09-09",
   "Parameters":{
+    "DromedaryRepo":{
+      "Type":"String",
+      "Description":"The Github https address to the public dromedary repository.",
+      "Default":"https://github.com/stelligent/dromedary.git"
+    },
+    "Branch":{
+      "Type":"String",
+      "Description":"The Github branch the public dromedary repository.",
+      "Default":"master"
+    },
+    "ProdHostedZone":{
+      "Type":"String",
+      "Default":"Nothing.For.Now",
+      "Description":"Route53 Hosted Zone (e.g. PRODHOST.HOSTED.ZONE)",
+      "AllowedPattern":"^.*?\\..*?\\..*$"
+    },
+    "AliveDuration":{
+      "Type":"String",
+      "Description":"Duration to keep demo deployment active. (e.g. 4h, 3h, 30m, etc)",
+      "Default":"4h",
+      "AllowedPattern":"[0-9]+(m|h)"
+    },
+    "GitHubToken":{
+      "NoEcho":"true",
+      "Type":"String",
+      "Description":"Secret. OAuthToken with access to Repo. The default is invalid and used for example purposes. Go to https://github.com/settings/tokens",
+      "Default":"4a189a34546435225614563ebd44a1531a4657af"
+    },
+    "GitHubUser":{
+      "Type":"String",
+      "Description":"GitHub UserName. This username must have access to the GitHubToken.",
+      "Default":"stelligent"
+    },
     "Ec2SshKeyName":{
       "Type":"AWS::EC2::KeyPair::KeyName",
       "Description":"The ec2 key name to use for ssh access to the bootstrapping instance."
@@ -31,6 +64,19 @@
     }
   },
   "Outputs":{
+    "StackName":{
+      "Value":{
+        "Ref":"AWS::StackName"
+      }
+    },
+    "VPC":{
+      "Value":{
+        "Fn::GetAtt":[
+          "VPCStack",
+          "Outputs.VPC"
+        ]
+      }
+    },
     "SubnetId":{
       "Value":{
         "Fn::GetAtt":[
@@ -71,11 +117,16 @@
         ]
       }
     },
-    "VPC":{
+    "S3Bucket":{
       "Value":{
-        "Fn::GetAtt":[
-          "VPCStack",
-          "Outputs.VPC"
+        "Fn::Join":[
+          "",
+          [
+            "dromedary-",
+            {
+              "Ref":"AWS::AccountId"
+            }
+          ]
         ]
       }
     }
