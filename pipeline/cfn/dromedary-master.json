@@ -41,8 +41,7 @@
     },
     "JobConfigsTarball":{
       "Type":"String",
-      "Description":"The S3 key for the S3Bucket.",
-      "Default":"pmd1446-jenkins/jenkins-job-configs-1453319706.tgz"
+      "Description":"The S3 key for the S3Bucket."
     }
   },
   "Resources":{
