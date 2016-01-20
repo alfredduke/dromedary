@@ -36,8 +36,13 @@
       "Default":"stelligent"
     },
     "Ec2SshKeyName":{
-      "Type":"AWS::EC2::KeyPair::KeyName",
+      "Type":"String",
       "Description":"The ec2 key name to use for ssh access to the bootstrapping instance."
+    },
+    "JobConfigsTarball":{
+      "Type":"String",
+      "Description":"The S3 key for the S3Bucket.",
+      "Default":"pmd1446-jenkins/jenkins-job-configs-1453319706.tgz"
     }
   },
   "Resources":{
@@ -60,6 +65,60 @@
       "Properties":{
         "TemplateURL":"https://s3.amazonaws.com/stelligent-training-public/public/iam.json",
         "TimeoutInMinutes":"60"
+      }
+    },
+    "JenkinsStack":{
+      "Type":"AWS::CloudFormation::Stack",
+      "DependsOn":[
+        "VPCStack",
+        "IAMStack"
+      ],
+      "Properties":{
+        "TemplateURL":"https://s3.amazonaws.com/stelligent-training-public/public/jenkins-instance.json",
+        "TimeoutInMinutes":"60",
+        "Parameters":{
+          "Ec2Key":{
+            "Ref":"Ec2SshKeyName"
+          },
+          "SubnetId":{
+            "Fn::GetAtt":[
+              "VPCStack",
+              "Outputs.SubnetId"
+            ]
+          },
+          "VPC":{
+            "Fn::GetAtt":[
+              "VPCStack",
+              "Outputs.VPC"
+            ]
+          },
+          "CfnInitRole":{
+            "Fn::GetAtt":[
+              "IAMStack",
+              "Outputs.InstanceRole"
+            ]
+          },
+          "InstanceProfile":{
+            "Fn::GetAtt":[
+              "IAMStack",
+              "Outputs.InstanceProfile"
+            ]
+          },
+          "JobConfigsTarball":{
+            "Ref":"JobConfigsTarball"
+          },
+          "S3Bucket":{
+            "Fn::Join":[
+              "",
+              [
+                "dromedary-",
+                {
+                  "Ref":"AWS::AccountId"
+                }
+              ]
+            ]
+          }
+        }
       }
     }
   },
