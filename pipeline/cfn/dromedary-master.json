@@ -1,5 +1,5 @@
 {
-  "Description":"Launch nested CloudFormation stack to provision all Dromedary resources",
+  "Description":"Launch nested CloudFormation stack to provision all Dromedary resources ** This template creates one or more Amazon resources. You will be billed for the AWS resources used if you create a stack from this template.",
   "AWSTemplateFormatVersion":"2010-09-09",
   "Parameters":{
     "DromedaryRepo":{
@@ -42,6 +42,24 @@
     "JobConfigsTarball":{
       "Type":"String",
       "Description":"The S3 key for the S3Bucket."
+    },
+    "Hostname":{
+      "Type":"String",
+      "Description":"DNS Hostname for prod IP (but not domainname)",
+      "Default":"pmd1700"
+    },
+    "Domain":{
+      "Type":"String",
+      "Description":"Route53 Hosted Zone name for prod IP (include trailing .)",
+      "Default":"oneclickdeployment.com."
+    },
+    "SecurityGroupId":{
+      "Type":"String",
+      "Description":"Security Group id with which to associate app ENI"
+    },
+    "MyInputArtifacts":{
+      "Type":"String",
+      "Default":"DromedarySource"
     }
   },
   "Resources":{
@@ -115,6 +133,65 @@
                   "Ref":"AWS::AccountId"
                 }
               ]
+            ]
+          }
+        }
+      }
+    },
+    "ENIStack":{
+      "Type":"AWS::CloudFormation::Stack",
+      "DependsOn":[
+        "JenkinsStack"
+      ],
+      "Properties":{
+        "TemplateURL":"https://s3.amazonaws.com/stelligent-training-public/public/app-eni.json",
+        "TimeoutInMinutes":"60",
+        "Parameters":{
+          "Hostname":{
+            "Ref":"Hostname"
+          },
+          "Domain":{
+            "Ref":"Domain"
+          },
+          "SubnetId":{
+            "Fn::GetAtt":[
+              "VPCStack",
+              "Outputs.SubnetId"
+            ]
+          },
+          "SecurityGroupId":{
+            "Ref":"SecurityGroupId"
+          }
+        }
+      }
+    },
+    "CustomActionsStack":{
+      "Type":"AWS::CloudFormation::Stack",
+      "DependsOn":[
+        "JenkinsStack"
+      ],
+      "Properties":{
+        "TemplateURL":"https://s3.amazonaws.com/stelligent-training-public/public/codepipeline-custom-actions.json",
+        "TimeoutInMinutes":"60",
+        "Parameters":{
+          "MyBuildProvider":{
+            "Fn::Join":[
+              "",
+              [
+                "Jenkins",
+                {
+                  "Ref":"AWS::StackName"
+                }
+              ]
+            ]
+          },
+          "MyInputArtifacts":{
+            "Ref":"MyInputArtifacts"
+          },
+          "MyJenkinsURL":{
+            "Fn::GetAtt":[
+              "JenkinsStack",
+              "Outputs.JenkinsURL"
             ]
           }
         }
