@@ -7,6 +7,13 @@
       "Description":"The Github https address to the public dromedary repository.",
       "Default":"https://github.com/stelligent/dromedary.git"
     },
+    "MyBuildProvider":{
+      "Type":"String"
+    },
+    "MyBuildProviderVersion":{
+      "Type":"String",
+      "Default":"2"
+    },
     "Branch":{
       "Type":"String",
       "Description":"The Github branch the public dromedary repository.",
@@ -45,17 +52,16 @@
     },
     "Hostname":{
       "Type":"String",
-      "Description":"DNS Hostname for prod IP (but not domainname)",
-      "Default":"pmd1700"
+      "Description":"DNS Hostname for prod IP (but not domainname)"
     },
     "Domain":{
       "Type":"String",
-      "Description":"Route53 Hosted Zone name for prod IP (include trailing .)",
-      "Default":"oneclickdeployment.com."
+      "Description":"Route53 Hosted Zone name for prod IP (include trailing .)"
     },
     "SecurityGroupId":{
       "Type":"String",
-      "Description":"Security Group id with which to associate app ENI"
+      "Description":"Security Group id with which to associate app ENI",
+      "Default":""
     },
     "MyInputArtifacts":{
       "Type":"String",
@@ -175,18 +181,66 @@
         "TimeoutInMinutes":"60",
         "Parameters":{
           "MyBuildProvider":{
+            "Ref":"MyBuildProvider"
+          },
+          "MyBuildProviderVersion":{
+            "Ref":"MyBuildProviderVersion"
+          },
+          "MyInputArtifacts":{
+            "Ref":"MyInputArtifacts"
+          },
+          "MyJenkinsURL":{
+            "Fn::GetAtt":[
+              "JenkinsStack",
+              "Outputs.JenkinsURL"
+            ]
+          }
+        }
+      }
+    },
+    "CodePipelineStack":{
+      "Type":"AWS::CloudFormation::Stack",
+      "DependsOn":[
+        "CustomActionsStack"
+      ],
+      "Properties":{
+        "TemplateURL":"https://s3.amazonaws.com/stelligent-training-public/public/codepipeline-cfn.json",
+        "TimeoutInMinutes":"60",
+        "Parameters":{
+          "ArtifactStoreBucket":{
             "Fn::Join":[
               "",
               [
-                "Jenkins",
+                "dromedary-",
                 {
-                  "Ref":"AWS::StackName"
+                  "Ref":"AWS::AccountId"
                 }
               ]
             ]
           },
+          "GitHubToken":{
+            "Ref":"GitHubToken"
+          },
+          "GitHubUser":{
+            "Ref":"GitHubUser"
+          },
+          "Repo":{
+            "Ref":"DromedaryRepo"
+          },
+          "Branch":{
+            "Ref":"Branch"
+          },
           "MyInputArtifacts":{
             "Ref":"MyInputArtifacts"
+          },
+          "MyBuildProvider":{
+            "Ref":"MyBuildProvider"
+          },
+          "CodePipelineServiceRole":{
+            "Fn::GetAtt":[
+              "IAMStack",
+              "Outputs.CodePipelineTrustRoleARN"
+            ]
           },
           "MyJenkinsURL":{
             "Fn::GetAtt":[
