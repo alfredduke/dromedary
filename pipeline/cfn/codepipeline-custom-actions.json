@@ -10,8 +10,7 @@
       "Type":"String"
     },
     "MyBuildProviderVersion":{
-      "Type":"String",
-      "Default":"1"
+      "Type":"String"
     },
     "MyJenkinsURL":{
       "Type":"String"

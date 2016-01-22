@@ -11,8 +11,7 @@
       "Type":"String"
     },
     "MyBuildProviderVersion":{
-      "Type":"String",
-      "Default":"2"
+      "Type":"String"
     },
     "Branch":{
       "Type":"String",
@@ -63,9 +62,28 @@
       "Description":"Security Group id with which to associate app ENI",
       "Default":""
     },
+    "CustomActionSwitch":{
+      "Description":"Whether to create Custom CodePipeline Action",
+      "Type":"String",
+      "Default":"on",
+      "AllowedValues":[
+        "on",
+        "off"
+      ]
+    },
     "MyInputArtifacts":{
       "Type":"String",
       "Default":"DromedarySource"
+    }
+  },
+  "Conditions":{
+    "IsCustomAction":{
+      "Fn::Equals":[
+        {
+          "Ref":"CustomActionSwitch"
+        },
+        "on"
+      ]
     }
   },
   "Resources":{
@@ -173,6 +191,7 @@
     },
     "CustomActionsStack":{
       "Type":"AWS::CloudFormation::Stack",
+      "Condition":"IsCustomAction",
       "DependsOn":[
         "JenkinsStack"
       ],
@@ -201,7 +220,7 @@
     "CodePipelineStack":{
       "Type":"AWS::CloudFormation::Stack",
       "DependsOn":[
-        "CustomActionsStack"
+        "JenkinsStack"
       ],
       "Properties":{
         "TemplateURL":"https://s3.amazonaws.com/stelligent-training-public/public/codepipeline-cfn.json",
@@ -235,6 +254,9 @@
           },
           "MyBuildProvider":{
             "Ref":"MyBuildProvider"
+          },
+          "MyBuildProviderVersion":{
+            "Ref":"MyBuildProviderVersion"
           },
           "CodePipelineServiceRole":{
             "Fn::GetAtt":[

@@ -279,7 +279,7 @@
                   "ami"
                ]
             },
-            "InstanceType":"t2.micro",
+            "InstanceType":"t2.medium",
             "IamInstanceProfile":{
                "Ref":"BootstrapInstanceProfile"
             },

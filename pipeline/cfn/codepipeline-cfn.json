@@ -32,7 +32,8 @@
          "Default":"DromedarySource"
       },
       "MyBuildProvider":{
-         "Type":"String"
+         "Type":"String",
+         "Description":"Unique identifier for Custom Action"
       },
       "MyJenkinsURL":{
          "Type":"String"
