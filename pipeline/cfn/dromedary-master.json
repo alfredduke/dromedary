@@ -11,7 +11,8 @@
       "Type":"String"
     },
     "MyBuildProviderVersion":{
-      "Type":"String"
+      "Type":"String",
+      "Default":"1"
     },
     "Branch":{
       "Type":"String",
