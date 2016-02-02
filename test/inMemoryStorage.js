@@ -1,7 +1,7 @@
 var expect    = require("chai").expect;
 var InMemStor = require("../lib/inMemoryStorage.js");
 
-var expectedNumberOfItems = 4;
+var expectedNumberOfItems = 3;
 var expectedProperties = ['value', 'color', 'highlight', 'label'];
 var backend = new InMemStor();
 
@@ -11,7 +11,7 @@ describe("inMemoryStorage", function() {
       this.chartData = backend.getForChartJs();
     });
 
-    it("has exactly (" + expectedNumberOfItems + ") items", function() {
+    it("has exactly " + expectedNumberOfItems + " items", function() {
       expect(this.chartData).to.have.length(expectedNumberOfItems);
     });
 
