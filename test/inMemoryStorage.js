@@ -11,7 +11,7 @@ describe("inMemoryStorage", function() {
       this.chartData = backend.getForChartJs();
     });
 
-    it("has exactly " + expectedNumberOfItems + " items", function() {
+    it("has exactly (" + expectedNumberOfItems + ") items", function() {
       expect(this.chartData).to.have.length(expectedNumberOfItems);
     });
 
